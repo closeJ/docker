@@ -1,0 +1,45 @@
+version: '3.1'
+
+services:
+   database:
+     image: mysql:5.7
+     container_name: database
+     volumes:
+      - ./db_data/:/var/lib/mysql
+     ports:
+      - "8887:3306"
+     command: --innodb-use-native-aio=0
+     restart: always
+     environment:
+       TZ: "Asia/Taipei"
+       MYSQL_USER: admin
+       MYSQL_PASSWORD: 1234
+       MYSQL_DATABASE: wordpress
+       MYSQL_ROOT_PASSWORD: 1111
+
+   wordpress:
+     image: wordpress
+     container_name: wordpress
+     volumes:
+      - ./www:/var/www/html
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+     ports:
+       - "1000:80"
+     depends_on:
+       - database
+     restart: always
+     environment:
+      WORDPRESS_DB_HOST: database
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: 1234
+
+   phpmyadmin:
+     image: phpmyadmin/phpmyadmin
+     container_name: phpmyadmin
+     depends_on:
+       - database
+     ports:
+       - "1100:80"
+     environment:
+       PMA_HOST: database
